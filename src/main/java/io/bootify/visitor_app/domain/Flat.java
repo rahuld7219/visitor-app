@@ -33,6 +33,9 @@ public class Flat {
     @OneToMany(mappedBy = "flat")
     private Set<User> flatUsers;
 
+    @OneToMany(mappedBy = "flat")
+    private Set<Visit> visits;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime dateCreated;

@@ -52,6 +52,10 @@ public class Visit {
     @JoinColumn(name = "visitor_id", nullable = false)
     private Visitor visitor;
 
+    @ManyToOne
+    @JoinColumn(name = "flat_id")
+    private Flat flat;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime dateCreated;

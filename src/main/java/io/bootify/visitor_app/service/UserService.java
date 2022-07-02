@@ -70,7 +70,7 @@ public class UserService {
         userDTO.setPhone(user.getPhone());
         userDTO.setFlat(user.getFlat() == null ? null : user.getFlat().getId());
         userDTO.setAddress(user.getAddress() == null ? null : user.getAddress().getId());
-        userDTO.setRoleId(user.getRoleId() == null ? null : user.getRoleId().getId());
+        userDTO.setRoleId(user.getRole() == null ? null : user.getRole().getId());
         return userDTO;
     }
 
@@ -84,9 +84,9 @@ public class UserService {
         final Address address = userDTO.getAddress() == null ? null : addressRepository.findById(userDTO.getAddress())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
         user.setAddress(address);
-        final Role roleId = userDTO.getRoleId() == null ? null : roleRepository.findById(userDTO.getRoleId())
+        final Role role = userDTO.getRoleId() == null ? null : roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "roleId not found"));
-        user.setRoleId(roleId);
+        user.setRole(role);
         return user;
     }
 

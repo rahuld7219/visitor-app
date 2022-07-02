@@ -47,8 +47,8 @@ public class User {
     private Address address;
 
     @OneToOne
-    @JoinColumn(name = "role_id_id", nullable = false)
-    private Role roleId;
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
