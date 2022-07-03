@@ -1,11 +1,13 @@
 package io.bootify.visitor_app.service;
 
 import io.bootify.visitor_app.domain.Flat;
+import io.bootify.visitor_app.domain.User;
 import io.bootify.visitor_app.domain.Visit;
 import io.bootify.visitor_app.domain.Visitor;
 import io.bootify.visitor_app.model.VisitDTO;
 import io.bootify.visitor_app.model.VisitStatus;
 import io.bootify.visitor_app.repos.FlatRepository;
+import io.bootify.visitor_app.repos.UserRepository;
 import io.bootify.visitor_app.repos.VisitRepository;
 import io.bootify.visitor_app.repos.VisitorRepository;
 
@@ -27,9 +29,11 @@ public class VisitService {
     @Autowired
     private FlatRepository flatRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private final VisitRepository visitRepository;
     private final VisitorRepository visitorRepository;
-
     public VisitService(final VisitRepository visitRepository,
             final VisitorRepository visitorRepository) {
         this.visitRepository = visitRepository;
@@ -38,6 +42,17 @@ public class VisitService {
 
     public List<VisitDTO> findAll() {
         return visitRepository.findAll(Sort.by("id"))
+                .stream()
+                .map(visit -> mapToDTO(visit, new VisitDTO()))
+                .collect(Collectors.toList());
+    }
+
+    public List<VisitDTO> getPendingVisits(Long userId) {
+        User user = userRepository.findById(userId).get(); // TODO: handle if not found
+
+        Flat userFlat = user.getFlat();
+
+        return visitRepository.findByFlatAndStatus(userFlat, VisitStatus.PENDING)
                 .stream()
                 .map(visit -> mapToDTO(visit, new VisitDTO()))
                 .collect(Collectors.toList());
@@ -72,6 +87,50 @@ public class VisitService {
             visit.get().setStatus(VisitStatus.COMPLETED);
         } else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is not updated");
+        }
+    }
+
+//    public void approveVisit(Long visitId, Long userId) {
+//        Visit visit = visitRepository.findById(visitId).get(); // TODO: handle if not found
+//        Flat flat = visit.getFlat();
+//
+//        User user = userRepository.findById(userId).get();
+//
+//        if(flat.getId() == user.getFlat().getId() && visit.getStatus().equals(VisitStatus.PENDING)) {
+//            visit.setStatus(VisitStatus.APPROVED);
+//            visitRepository.save(visit);
+//        } else {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flat is not mapped OR status is not pending");
+//        }
+//    }
+//
+//    public void rejectVisit(Long visitId, Long userId) {
+//        Visit visit = visitRepository.findById(visitId).get(); // TODO: handle if not found
+//        Flat flat = visit.getFlat();
+//
+//        User user = userRepository.findById(userId).get();
+//
+//        if(flat.getId() == user.getFlat().getId() && visit.getStatus().equals(VisitStatus.PENDING)) {
+//            visit.setStatus(VisitStatus.REJECTED);
+//            visitRepository.save(visit);
+//        } else {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flat is not mapped OR status is not pending");
+//        }
+//    }
+
+    // Refactored in place of above two
+    public void updateVisit(Long visitId, Long userId, VisitStatus visitStatus) { // TODO: rename to updateVisitStatus
+        Visit visit = visitRepository.findById(visitId).get(); // TODO: handle if not found
+
+        Flat flat = visit.getFlat();
+
+        User user = userRepository.findById(userId).get();
+
+        if(flat.getId() == user.getFlat().getId() && visit.getStatus().equals(VisitStatus.PENDING)) {
+            visit.setStatus(visitStatus);
+            visitRepository.save(visit);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flat is not mapped OR status is not pending");
         }
     }
 
