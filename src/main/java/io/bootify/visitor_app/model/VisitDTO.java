@@ -13,7 +13,6 @@ public class VisitDTO {
 
     private Long id;
 
-    @NotNull
     private VisitStatus status;
 
     private LocalDateTime inTime;
@@ -24,6 +23,9 @@ public class VisitDTO {
     private String urlOfImage;
 
     private Integer noOfPeople;
+
+    @NotNull
+    private Long flatId;
 
     @NotNull
     private Long visitor;

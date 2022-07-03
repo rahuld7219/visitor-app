@@ -45,12 +45,6 @@ public class Address {
     @Column
     private String country;
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-    private User address;
-
-//    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-//    private Visitor address;
-
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime dateCreated;

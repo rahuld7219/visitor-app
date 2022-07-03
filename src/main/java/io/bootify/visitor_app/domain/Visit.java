@@ -53,7 +53,7 @@ public class Visit {
     private Visitor visitor;
 
     @ManyToOne
-    @JoinColumn(name = "flat_id")
+    @JoinColumn(name = "flat_id", nullable = false)
     private Flat flat;
 
     @CreatedDate

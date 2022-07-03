@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EntityScan("io.bootify.visitor_app.domain")
-@EnableJpaRepositories("io.bootify.visitor_app.repos")
+@EnableJpaRepositories("io.bootify.visitor_app.repos") // create bean of repos without need to specify @Repository over them
 @EnableTransactionManagement
 @EnableJpaAuditing(dateTimeProviderRef = "auditingDateTimeProvider")
 public class DomainConfig {

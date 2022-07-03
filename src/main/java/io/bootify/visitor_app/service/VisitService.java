@@ -1,12 +1,20 @@
 package io.bootify.visitor_app.service;
 
+import io.bootify.visitor_app.domain.Flat;
 import io.bootify.visitor_app.domain.Visit;
 import io.bootify.visitor_app.domain.Visitor;
 import io.bootify.visitor_app.model.VisitDTO;
+import io.bootify.visitor_app.model.VisitStatus;
+import io.bootify.visitor_app.repos.FlatRepository;
 import io.bootify.visitor_app.repos.VisitRepository;
 import io.bootify.visitor_app.repos.VisitorRepository;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,6 +23,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class VisitService {
+
+    @Autowired
+    private FlatRepository flatRepository;
 
     private final VisitRepository visitRepository;
     private final VisitorRepository visitorRepository;
@@ -39,9 +50,29 @@ public class VisitService {
     }
 
     public Long create(final VisitDTO visitDTO) {
+        visitDTO.setStatus(VisitStatus.PENDING);
         final Visit visit = new Visit();
         mapToEntity(visitDTO, visit);
         return visitRepository.save(visit).getId();
+    }
+
+    public void markEntry(Long visitId) {
+        Optional<Visit> visit = visitRepository.findById(visitId);
+        if (visit.isPresent() && visit.get().getStatus().equals(VisitStatus.APPROVED)) {
+            visit.get().setInTime(LocalDateTime.now());
+        } else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is not updated");
+        }
+    }
+
+    public void markExit(Long visitId) {
+        Optional<Visit> visit = visitRepository.findById(visitId);
+        if (visit.isPresent() && visit.get().getStatus().equals(VisitStatus.APPROVED)) {
+            visit.get().setOutTime(LocalDateTime.now());
+            visit.get().setStatus(VisitStatus.COMPLETED);
+        } else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is not updated");
+        }
     }
 
     public void update(final Long id, final VisitDTO visitDTO) {
@@ -63,6 +94,7 @@ public class VisitService {
         visitDTO.setUrlOfImage(visit.getUrlOfImage());
         visitDTO.setNoOfPeople(visit.getNoOfPeople());
         visitDTO.setVisitor(visit.getVisitor() == null ? null : visit.getVisitor().getId());
+        visitDTO.setFlatId(visit.getFlat().getId());
         return visitDTO;
     }
 
@@ -72,6 +104,8 @@ public class VisitService {
         visit.setOutTime(visitDTO.getOutTime());
         visit.setUrlOfImage(visitDTO.getUrlOfImage());
         visit.setNoOfPeople(visitDTO.getNoOfPeople());
+        Flat flat = flatRepository.findById(visitDTO.getFlatId()).get(); // TODO: Handle it when no flat found
+        visit.setFlat(flat);
         final Visitor visitor = visitDTO.getVisitor() == null ? null : visitorRepository.findById(visitDTO.getVisitor())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "visitor not found"));
         visit.setVisitor(visitor);

@@ -5,8 +5,10 @@ import io.bootify.visitor_app.domain.Visitor;
 import io.bootify.visitor_app.model.VisitorDTO;
 import io.bootify.visitor_app.repos.AddressRepository;
 import io.bootify.visitor_app.repos.VisitorRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class VisitorService {
     private final AddressRepository addressRepository;
 
     public VisitorService(final VisitorRepository visitorRepository,
-            final AddressRepository addressRepository) {
+                          final AddressRepository addressRepository) {
         this.visitorRepository = visitorRepository;
         this.addressRepository = addressRepository;
     }
@@ -36,6 +38,12 @@ public class VisitorService {
         return visitorRepository.findById(id)
                 .map(visitor -> mapToDTO(visitor, new VisitorDTO()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    public VisitorDTO getByIdNumber(String idNumber) {
+        return visitorRepository.findByIdNumber(idNumber)
+                .map(visitor -> mapToDTO(visitor, new VisitorDTO()))
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     public Long create(final VisitorDTO visitorDTO) {
@@ -75,5 +83,6 @@ public class VisitorService {
         visitor.setAddress(address);
         return visitor;
     }
+
 
 }
