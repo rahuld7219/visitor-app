@@ -22,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
+
 
 @Service
 public class VisitService {
@@ -119,14 +121,30 @@ public class VisitService {
 //    }
 
     // Refactored in place of above two
+    @Transactional
+    // without @Transactional, as we are not accessing any flat data for the User before user.getFlat(),
+    // so flat data was not fetched as it is lazy fetched in User
+    // and also session is closed before it and no session opened for fetching flat, so user.getFlat()
+    // gives LazyInitializationException with no session message and user flat have null values
+    // by using @Transactional we are putting all the code in one transaction so session will remain open
+    // and flat data will be fetched while user.getflat()
     public void updateVisit(Long visitId, Long userId, VisitStatus visitStatus) { // TODO: rename to updateVisitStatus
-        Visit visit = visitRepository.findById(visitId).get(); // TODO: handle if not found
+        Visit visit = visitRepository.findById(visitId).get(); // here without @Transactional, one session opened and closed
+        // TODO: handle if not found
 
         Flat flat = visit.getFlat();
+        // here flat data would be available without @Transactional
+        // as in Visit flat is not lazy fetched so while fetching the visit above, flat data was also fetched
 
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findById(userId).get(); // here without @Transactional, one session opened and closed
 
-        if(flat.getId() == user.getFlat().getId() && visit.getStatus().equals(VisitStatus.PENDING)) {
+//        if(flat.getId() == user.getFlat().getId() && visit.getStatus().equals(VisitStatus.PENDING)) {
+            // can use above line instead if not using @Transactional as in this we are accessing user flat data,
+            // so a session will be opened and data will be fetched
+        if(flat == user.getFlat() && visit.getStatus().equals(VisitStatus.PENDING)) {
+            //NOTE: visit.getFlat() and user.getFlat() returns the same object as the flat is same,
+            // for the same flat 2 different object is not created, it is singleton design
+
             visit.setStatus(visitStatus);
             visitRepository.save(visit);
         } else {
