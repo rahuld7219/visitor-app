@@ -47,7 +47,7 @@ public class AdminPanelController {
     }
 
     // TODO: read address and flat data from file instead of just passing address id and flat id and save all to the database, just like we did in create-visitor API
-    // TODO: move the code to service
+    // TODO: move the code to service and put @Transactional
     @PostMapping("user-csv/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";

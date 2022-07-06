@@ -83,7 +83,7 @@ public class GateKeeperPanelController {
     /**
      * upload image of visitor while creating visit
      */
-    @PostMapping("/image/upload")
+    @PostMapping("/image/upload") // TODO: move the code to service
     public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file) {
         String message = "";
 
