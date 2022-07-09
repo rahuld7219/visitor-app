@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOGS" value="/tmp/logs" /> <!-- location where to save the logs-->
+
+    <appender name="Console"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <!-- specify the logging pattern -->
+            <Pattern>
+                %green(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] [requestId=%X{requestId}] %yellow(%C{1.}): %msg%n%throwable
+                <!-- read the requestId from MDC -->
+            </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="RollingFile"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- instead of passing the logs to a file/console we can pass it to Kafka, a message broker-->
+        <file>${LOGS}/visitor-app-logger.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 10 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/visitor-app-logger-%d{yyyy-MM-dd}.%i.log<!-- Log file name pattern to create new file once max size limit reached-->
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize> <!-- logs will be saved in a new log file once a log file reaches 10MB size-->
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- LOG everything at INFO level -->
+    <root level="info">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </root>
+
+    <!-- LOG "com.geeksforgeeks*" at TRACE level --><!-- to log for a particular package -->
+<!--    <logger name="com.geeksforgeeks" level="trace" additivity="false">-->
+<!--        <appender-ref ref="RollingFile" />-->
+<!--        <appender-ref ref="Console" />-->
+<!--    </logger>-->
+
+</configuration>
