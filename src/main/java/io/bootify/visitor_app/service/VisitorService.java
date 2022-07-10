@@ -9,6 +9,8 @@ import io.bootify.visitor_app.repos.VisitorRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class VisitorService {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(VisitorService.class);
 
     private final VisitorRepository visitorRepository;
     private final AddressRepository addressRepository;
@@ -41,6 +45,9 @@ public class VisitorService {
     }
 
     public VisitorDTO getByIdNumber(String idNumber) {
+
+        LOGGER.info("Searching visitor with idNumber : {}",idNumber);
+
         return visitorRepository.findByIdNumber(idNumber)
                 .map(visitor -> mapToDTO(visitor, new VisitorDTO()))
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -83,6 +90,5 @@ public class VisitorService {
         visitor.setAddress(address);
         return visitor;
     }
-
 
 }

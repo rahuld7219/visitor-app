@@ -87,6 +87,25 @@ public class UserService {
         final Role role = userDTO.getRoleId() == null ? null : roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "roleId not found"));
         user.setRole(role);
+
+        // can use below code instead of above, which is better???
+
+//        if (userDTO.getFlat() != null && (user.getFlat() == null || !user.getFlat().getId().equals(userDTO.getFlat()))) {
+//            final Flat flat = flatRepository.findById(userDTO.getFlat())
+//                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "flat not found"));
+//            user.setFlat(flat);
+//        }
+//        if (userDTO.getAddress() != null && (user.getAddress() == null || !user.getAddress().getId().equals(userDTO.getAddress()))) {
+//            final Address address = addressRepository.findById(userDTO.getAddress())
+//                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
+//            user.setAddress(address);
+//        }
+//        if (userDTO.getRoleId() != null && (user.getRole() == null || !user.getRole().getId().equals(userDTO.getRoleId()))) {
+//            final Role roleId = roleRepository.findById(userDTO.getRoleId())
+//                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "roleId not found"));
+//            user.setRole(roleId);
+//        }
+
         return user;
     }
 

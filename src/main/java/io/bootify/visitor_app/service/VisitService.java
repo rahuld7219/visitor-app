@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ import javax.transaction.Transactional;
 
 @Service
 public class VisitService {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(VisitService.class);
 
     @Autowired
     private FlatRepository flatRepository;
@@ -50,6 +54,9 @@ public class VisitService {
     }
 
     public List<VisitDTO> getPendingVisits(Long userId) {
+
+        LOGGER.info("Fetching all pending visits for user:{}",userId);
+
         User user = userRepository.findById(userId).get(); // TODO: handle if not found
 
         Flat userFlat = user.getFlat();
@@ -129,6 +136,7 @@ public class VisitService {
     // by using @Transactional we are putting all the code in one transaction so session will remain open
     // and flat data will be fetched while user.getflat()
     public void updateVisit(Long visitId, Long userId, VisitStatus visitStatus) { // TODO: rename to updateVisitStatus
+        LOGGER.info("Updating visit {} status to {}",visitId, visitStatus);
         Visit visit = visitRepository.findById(visitId).get(); // here without @Transactional, one session opened and closed
         // TODO: handle if not found
 
@@ -148,6 +156,7 @@ public class VisitService {
             visit.setStatus(visitStatus);
             visitRepository.save(visit);
         } else {
+            LOGGER.error("Invalid update visit request by user {} for visit {}",userId,visitId);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flat is not mapped OR status is not pending");
         }
     }
@@ -186,6 +195,15 @@ public class VisitService {
         final Visitor visitor = visitDTO.getVisitor() == null ? null : visitorRepository.findById(visitDTO.getVisitor())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "visitor not found"));
         visit.setVisitor(visitor);
+
+        // can use below code instead of above, which is better???
+
+//        if (visitDTO.getVisitor() != null && (visit.getVisitor() == null || !visit.getVisitor().getId().equals(visitDTO.getVisitor()))) {
+//            final Visitor visitor = visitorRepository.findById(visitDTO.getVisitor())
+//                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "visitor not found"));
+//            visit.setVisitor(visitor);
+//        }
+
         return visit;
     }
 
