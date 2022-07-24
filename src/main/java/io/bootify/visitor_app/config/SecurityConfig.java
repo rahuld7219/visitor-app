@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,13 +48,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
  * @param http
  * @throws Exception
  */
-//    protected void configure(HttpSecurity http) throws Exception {
-////        this.logger.debug("Using default configure(HttpSecurity). If subclassed this will potentially override subclass configure(HttpSecurity).");
-//        http.authorizeRequests((requests) -> {
-//            ((ExpressionUrlAuthorizationConfigurer.AuthorizedUrl)requests.anyRequest()).authenticated();
-//        });
-//        http.formLogin();
-//        http.httpBasic();
-//    }
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+//        this.logger.debug("Using default configure(HttpSecurity). If subclassed this will potentially override subclass configure(HttpSecurity).");
+        http.authorizeRequests().antMatchers("/api/user-panel/**").hasAuthority("RESIDENT")
+                        .antMatchers("/api/gatekeeper-panel/**").hasAnyAuthority("GATEKEEPER")
+                        .antMatchers("/api/admin-panel/**").hasAuthority("ADMIN");
+        http.formLogin();
+        http.httpBasic();
+        http.csrf().disable();
+    }
 
 }
