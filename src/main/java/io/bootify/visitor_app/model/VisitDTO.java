@@ -1,5 +1,6 @@
 package io.bootify.visitor_app.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -9,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class VisitDTO {
+public class VisitDTO implements Serializable {
 
     private Long id;
 

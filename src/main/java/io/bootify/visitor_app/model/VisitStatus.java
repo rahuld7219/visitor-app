@@ -1,7 +1,9 @@
 package io.bootify.visitor_app.model;
 
 
-public enum VisitStatus {
+import java.io.Serializable;
+
+public enum VisitStatus implements Serializable {
 
     PENDING,
     APPROVED,

@@ -6,6 +6,7 @@ import io.bootify.visitor_app.model.VisitStatus;
 import io.bootify.visitor_app.service.VisitService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +19,7 @@ import java.util.List;
 public class UserPanelContoller {
 
     @Autowired
-    VisitService visitService;
+    private VisitService visitService;
 
     @PostMapping("/approve-visit/{visitId}")
     @ApiResponse(responseCode = "200")

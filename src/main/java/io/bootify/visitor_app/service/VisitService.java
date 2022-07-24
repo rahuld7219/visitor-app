@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,6 +41,12 @@ public class VisitService {
 
     private final VisitRepository visitRepository;
     private final VisitorRepository visitorRepository;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    private String pendingVisitPrefix = "Pending_Flat_";
+
     public VisitService(final VisitRepository visitRepository,
             final VisitorRepository visitorRepository) {
         this.visitRepository = visitRepository;
@@ -53,6 +60,15 @@ public class VisitService {
                 .collect(Collectors.toList());
     }
 
+    /*
+    We can also cache the data using userId as key,
+    but we use flatId as key because it is more efficient
+    as in one flat there can be more than one resident so if we go with userId then for the same flat,
+    we may cache the same data multiple times with different resident(userId) of the same flat.
+
+    user_1: data
+    flat_1: data --> more efficient
+     */
     public List<VisitDTO> getPendingVisits(Long userId) {
 
         LOGGER.info("Fetching all pending visits for user:{}",userId);
@@ -61,10 +77,21 @@ public class VisitService {
 
         Flat userFlat = user.getFlat();
 
-        return visitRepository.findByFlatAndStatus(userFlat, VisitStatus.PENDING)
-                .stream()
-                .map(visit -> mapToDTO(visit, new VisitDTO()))
-                .collect(Collectors.toList());
+        String key = pendingVisitPrefix + userFlat.getId();
+
+        // getting cached data from the Redis
+        List<VisitDTO> visitDTOList = (List<VisitDTO>) redisTemplate.opsForValue().get(key);
+
+        // if cache not present for the key
+        if (visitDTOList == null) {
+            visitDTOList = visitRepository.findByFlatAndStatus(userFlat, VisitStatus.PENDING)
+                    .stream()
+                    .map(visit -> mapToDTO(visit, new VisitDTO()))
+                    .collect(Collectors.toList());
+            // cache the data in the Redis
+            redisTemplate.opsForValue().set(key, visitDTOList);
+        }
+        return visitDTOList;
     }
 
     public VisitDTO get(final Long id) {
