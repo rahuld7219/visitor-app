@@ -68,6 +68,10 @@ public class VisitService {
 
     user_1: data
     flat_1: data --> more efficient
+
+    NOTE: Similar caching code below can be applied to many methods(especially for GET API)
+          So, we can create our annotation for this instead of writing same code again and again,
+          or use spring annotations like @Cacheable, etc. to do the same things (google caching in spring boot)
      */
     public List<VisitDTO> getPendingVisits(Long userId) {
 
@@ -182,6 +186,17 @@ public class VisitService {
 
             visit.setStatus(visitStatus);
             visitRepository.save(visit);
+
+            // delete the cache data for pending visits,
+            // so that next time it get updated when getPendingVisits called,
+            // otherwise we get old cached data.
+            // (the best way to update cache data is to delete the cache entry, so it gets created again with the updated data)
+            String key = pendingVisitPrefix + flat.getId();
+//            redisTemplate.opsForValue().getAndDelete(key); // this may give RedisSystemException if there is compatibility
+                                                                // problem between dependency version added in the project
+                                                                // and the redis server version running at the system
+            redisTemplate.delete(key); // opsForValue(), etc. related to particular data structures,
+                                        // but deleting a key may not, so we can call it directly, this works instead of above way
         } else {
             LOGGER.error("Invalid update visit request by user {} for visit {}",userId,visitId);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flat is not mapped OR status is not pending");
