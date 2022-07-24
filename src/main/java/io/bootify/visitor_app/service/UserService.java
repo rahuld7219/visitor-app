@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +25,8 @@ public class UserService {
     private final FlatRepository flatRepository;
     private final AddressRepository addressRepository;
     private final RoleRepository roleRepository;
+
+    private PasswordEncoder passwordEncoder;
 
     public UserService(final UserRepository userRepository, final FlatRepository flatRepository,
             final AddressRepository addressRepository, final RoleRepository roleRepository) {
@@ -48,6 +51,8 @@ public class UserService {
 
     public Long create(final UserDTO userDTO) {
         final User user = new User();
+        user.setPassword(passwordEncoder.encode("123")); // setting default password,
+                                                                    // user can change it later using change password API
         mapToEntity(userDTO, user);
         return userRepository.save(user).getId();
     }

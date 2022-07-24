@@ -18,7 +18,7 @@ public class RequestFilter extends HttpFilter { // , any class extending HttpFil
     private static final String REQUEST_ID = "requestId";
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException, ServletException, IOException {
-        MDC.put(REQUEST_ID,((RequestFacade) servletRequest).getHeader(REQUEST_ID));
+//        MDC.put(REQUEST_ID,((RequestFacade) servletRequest).getHeader(REQUEST_ID));
         filterChain.doFilter(servletRequest,servletResponse); // pass the request to the next filter(if any)
                                                                 // or to the controller(if this filter is the last in the chain)
                                                                 // with the request and response to pass along the chain
