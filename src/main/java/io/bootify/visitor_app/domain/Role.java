@@ -1,5 +1,6 @@
 package io.bootify.visitor_app.domain;
 
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class Role {
+public class Role implements Serializable {
 
     @Id
     @Column(nullable = false, updatable = false)
